@@ -11,8 +11,8 @@ const PUBLIC_ENDPOINTS = [
   "/auth/send-otp", 
   "/auth/verify-otp", 
   "/auth/register",
-  "/games",
-  "/categories"
+  // "/games",
+  // "/categories"
 ];
 
 api.interceptors.request.use((config) => {
