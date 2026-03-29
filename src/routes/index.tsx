@@ -2,6 +2,7 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import AdminLayout from "../components/AdminLayout";
+import PlayerLayout from "../components/PlayerLayout";
 
 const Index = lazy(() => import("../pages"));
 const Login = lazy(() => import("../pages/Login"));
@@ -10,6 +11,7 @@ const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const CategoryManage = lazy(() => import("../pages/admin/CategoryManage"));
 const AdminGameManage = lazy(() => import("../pages/admin/AdminGameManage"));
 const PlayGame = lazy(() => import("../pages/PlayGame"));
+const PlayerDashboard = lazy(() => import("../pages/player/PlayerDashboard"));
 
 type RequireAuthTypes = { children: ReactNode; roles?: string[] };
 
@@ -113,6 +115,17 @@ export default function Router() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="games" element={<AdminGameManage />} />
             <Route path="categories" element={<CategoryManage />} />
+          </Route>
+
+          <Route
+            path="/player"
+            element={
+              <RequireAuth>
+                <PlayerLayout />
+                </RequireAuth>
+            }
+          >
+            <Route index element={<PlayerDashboard />} />
           </Route>
         </Routes>
       </Suspense>
