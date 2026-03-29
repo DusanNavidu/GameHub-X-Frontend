@@ -50,7 +50,7 @@ export default function Login() {
       if (data.data.role === "ADMIN" || (data.data.roles && data.data.roles.includes("ADMIN"))) {
         navigate("/admin/dashboard");
       } else {
-        navigate("/");
+        navigate("/player");
       }
       
     } catch (err: any) {

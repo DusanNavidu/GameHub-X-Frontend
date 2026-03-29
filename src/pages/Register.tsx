@@ -25,7 +25,7 @@ export default function Register() {
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       setUser(data.data);
-      navigate("/");
+      navigate("/login");
     } catch (err: any) {
       setError(err.response?.data?.message || "Registration failed");
     } finally {
@@ -60,7 +60,7 @@ export default function Register() {
               placeholder="PLAYER NAME"
               value={fullname}
               onChange={(e) => setFullname(e.target.value)}
-              className="w-full bg-black/40 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-all font-mono uppercase"
+              className="w-full bg-black/40 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-all font-mono"
             />
           </div>
 
@@ -72,7 +72,7 @@ export default function Register() {
               placeholder="EMAIL ADDRESS"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/40 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-all font-mono uppercase"
+              className="w-full bg-black/40 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-all font-mono"
             />
           </div>
 
