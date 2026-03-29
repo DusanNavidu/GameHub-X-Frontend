@@ -1,15 +1,20 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Flame, MonitorPlay, Gamepad2, LayoutGrid, Trophy, Users } from "lucide-react";
+import { Search, Flame, MonitorPlay, Gamepad2, LayoutGrid, User as UserIcon, LogOut, ShieldAlert } from "lucide-react";
 import ProgressiveImage from "../components/ProgressiveImage";
 import Button from "../components/Button";
 import { getGames, type GameData } from "../service/game";
 import { getCategories, type CategoryData } from "../service/category";
 import GameCard from "../components/GameCard";
 import GameInfoModel from "../components/GameInfoModel";
+import UserProfileModal from "../components/UserProfileModal";
+import { useAuth } from "../context/authContext";
 
-export default function Index() {
+export default function AuthDashboardPlayer() {
   const navigate = useNavigate();
+  const { user, setUser } = useAuth(); // 🟢 Auth Context
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
   const [showIntro, setShowIntro] = useState(true);
   const [zoomLogo, setZoomLogo] = useState(false);
 
@@ -123,8 +128,51 @@ export default function Index() {
             />
           </div>
 
-          <div className="hidden md:flex gap-3">
-            {/* profile logo and fullname show */}
+          {/* 🟢 Desktop Auth / Profile Area */}
+          <div className="hidden md:flex gap-4 items-center">
+            {user ? (
+              <div className="flex items-center gap-4">
+                {/* Admin Button (Admin නම් විතරක් පෙන්නන්න) */}
+                {user.role === "ADMIN" && (
+                  <button onClick={() => navigate("/admin/dashboard")} className="text-xs font-mono text-green-400 hover:text-green-300 flex items-center gap-1 uppercase tracking-widest border border-green-500/30 px-3 py-1.5 rounded-lg bg-green-500/10 transition-colors">
+                    <ShieldAlert size={14} /> Command
+                  </button>
+                )}
+                
+                {/* User Profile Clickable Area */}
+                <div 
+                  className="flex items-center gap-3 cursor-pointer group"
+                  onClick={() => setShowProfileModal(true)}
+                >
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-white uppercase tracking-wider group-hover:text-green-400 transition-colors">{user.fullname}</p>
+                    <p className="text-[10px] text-gray-500 font-mono tracking-widest">{user.role}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full border-2 border-green-500/50 overflow-hidden bg-black/50 group-hover:border-green-400 transition-colors shadow-[0_0_10px_rgba(34,197,94,0.2)]">
+                    {user.profilePic ? (
+                      <img src={user.profilePic} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-full h-full p-2 text-green-500" />
+                    )}
+                  </div>
+                </div>
+                
+                {/* Logout Button */}
+                <button onClick={() => {
+                  localStorage.removeItem("accessToken");
+                  localStorage.removeItem("refreshToken");
+                  setUser(null);
+                  window.location.reload();
+                }} className="p-2 text-gray-500 hover:text-red-500 transition-colors rounded-lg hover:bg-white/5" title="Logout">
+                  <LogOut size={18} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Button variant="white" size="sm" onClick={() => navigate('/login')}>Login</Button>
+                <Button variant="green" size="sm" onClick={() => navigate('/register')}>Join Arena</Button>
+              </>
+            )}
           </div>
         </header>
 
@@ -230,6 +278,17 @@ export default function Index() {
                 onClose={() => setSelectedGame(null)} 
                 onPlay={(id) => navigate(`/play/${id}`)}
             />
+        )}
+
+        {/* 🟢 Profile Upload Modal */}
+        {showProfileModal && user && (
+          <UserProfileModal 
+            user={user} 
+            onClose={() => setShowProfileModal(false)}
+            onUpdateSuccess={(newPicUrl) => {
+              setUser({ ...user, profilePic: newPicUrl });
+            }}
+          />
         )}
 
       </div>

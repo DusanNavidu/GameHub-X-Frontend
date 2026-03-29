@@ -29,3 +29,10 @@ export const getRole = async () => {
   const res = await api.get("/auth/role")
   return res.data
 }
+
+export const updateProfilePic = async (formData: FormData) => {
+  const res = await api.put("/auth/profile-pic", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
