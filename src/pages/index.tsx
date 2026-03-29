@@ -1,0 +1,249 @@
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, Flame, MonitorPlay, Gamepad2, LayoutGrid, Trophy, Users } from "lucide-react";
+import ProgressiveImage from "../components/ProgressiveImage";
+import Button from "../components/Button";
+import { getGames, type GameData } from "../service/game";
+import { getCategories, type CategoryData } from "../service/category";
+import GameCard from "../components/GameCard";
+import GameInfoModel from "../components/GameInfoModel";
+
+export default function Index() {
+  const navigate = useNavigate();
+  const [showIntro, setShowIntro] = useState(true);
+  const [zoomLogo, setZoomLogo] = useState(false);
+
+  // Data States
+  const [games, setGames] = useState<GameData[]>([]);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // UI States
+  const [selectedGame, setSelectedGame] = useState<GameData | null>(null);
+  const [activeCategory, setActiveCategory] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const zoomTimer = setTimeout(() => setZoomLogo(true), 100);
+    const introTimer = setTimeout(() => setShowIntro(false), 3000);
+
+    // Initial Data Fetch
+    const fetchData = async () => {
+      try {
+        const [gamesRes, catRes] = await Promise.all([
+          getGames(),
+          getCategories("", "ACTIVE")
+        ]);
+        setGames(gamesRes.data);
+        setCategories(catRes.data);
+      } catch (err) {
+        console.error("Failed to load arena data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      clearTimeout(zoomTimer);
+      clearTimeout(introTimer);
+    };
+  }, []);
+
+  // Filter Logic
+  const filteredGames = games.filter(game => {
+    const matchesCategory = activeCategory === "ALL" || game.categoryId?._id === activeCategory;
+    const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  // 🔴 Intro Animation Section
+  if (showIntro) {
+    return (
+      <div className="h-screen w-full bg-[#050505] flex items-center justify-center overflow-hidden px-4 relative">
+        <div className="absolute w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-green-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div 
+          className={`relative z-10 flex flex-col items-center transition-all duration-1000 ease-out transform ${
+            zoomLogo ? "scale-100 sm:scale-110 opacity-100 translate-y-0" : "scale-75 opacity-0 translate-y-10"
+          }`}
+        >
+          <ProgressiveImage
+            lowResSrc="https://i.ibb.co/low-quality-link-here.jpg"
+            highResSrc="https://i.ibb.co/VWmrz715/Game-Hub-X-lago.png"
+            alt="GameHub-X Logo"
+            className="w-48 sm:w-64 md:w-80 h-auto mb-6 drop-shadow-[0_0_15px_rgba(34,197,94,0.4)]"
+          />
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-[0.2em] sm:tracking-[0.3em] text-center uppercase">
+            GAMEHUB-<span className="text-green-500 drop-shadow-[0_0_10px_#22c55e]">X</span>
+          </h1>
+          <div className="mt-8 flex flex-col items-center">
+            <p className="text-green-500 font-mono tracking-[0.4em] text-xs sm:text-sm animate-pulse text-center uppercase">
+              Initializing Arena
+            </p>
+            <div className="w-48 h-1 bg-gray-800 rounded-full mt-3 overflow-hidden">
+              <div className="h-full bg-green-500 shadow-[0_0_10px_#22c55e] animate-loading-bar"></div>
+            </div>
+          </div>
+        </div>
+        <style>{`
+          @keyframes loading-bar { 0% { width: 0%; } 50% { width: 60%; } 100% { width: 100%; } }
+          .animate-loading-bar { animation: loading-bar 2.5s ease-in-out forwards; }
+        `}</style>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#050505] font-sans text-white selection:bg-green-500/30 overflow-x-hidden relative">
+      
+      {/* Background Ambient Glow */}
+      <div className="fixed top-[-20%] left-[-10%] w-[500px] h-[500px] bg-green-600/10 rounded-full blur-[150px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-6 pb-20 relative z-10">
+        
+        {/* 🌟 Top Navigation Bar */}
+        <header className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-lg">
+          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start cursor-pointer" onClick={() => window.location.reload()}>
+            <h2 className="text-2xl font-black tracking-widest text-white drop-shadow-[0_0_8px_rgba(34,197,94,0.5)] uppercase flex items-center">
+              <span className="me-3 w-2 h-6 bg-green-500 inline-block rounded-sm"></span>
+              GameHub-<span className="text-green-500">X</span>
+            </h2>
+          </div>
+
+          <div className="relative w-full md:w-[400px] group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-green-500 transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Search assets, sectors..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-black/40 border border-gray-700/50 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-green-500/60 transition-all font-mono"
+            />
+          </div>
+
+          <div className="hidden md:flex gap-3">
+            <Button variant="white" size="sm" onClick={() => navigate('/login')}>Login</Button>
+            <Button variant="green" size="sm" onClick={() => navigate('/register')}>Join Arena</Button>
+          </div>
+        </header>
+
+        {/* 🚀 Hero Banner */}
+        <div className="relative w-full h-[350px] md:h-[450px] rounded-3xl overflow-hidden border border-white/10 shadow-2xl mb-12 flex items-center p-8 md:p-16 group">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-40"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
+          
+          <div className="relative z-10 max-w-2xl">
+            <div className="flex items-center gap-2 text-green-400 text-xs font-black tracking-[0.3em] uppercase mb-4">
+              <span className="w-8 h-[2px] bg-green-500"></span> Live Nexus
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black text-white uppercase leading-[0.9] mb-6">
+              Ultimate <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-600">Gaming HUB</span>
+            </h1>
+            <p className="text-gray-400 text-sm md:text-base mb-8 max-w-md font-medium leading-relaxed">
+              Access the most elite collection of instant-play games. No downloads. No lag. Just pure performance.
+            </p>
+            <div className="flex gap-4">
+                <Button variant="green" size="lg" className="px-8 shadow-[0_0_20px_rgba(34,197,94,0.3)]">
+                Launch Now
+                </Button>
+                <div className="flex items-center gap-4 px-6 border-l border-white/10 ml-2">
+                    <div className="text-center">
+                        <p className="text-white font-bold">12K+</p>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-mono">Players</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-white font-bold">500+</p>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-mono">Assets</p>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 🏷️ Category Filter Bar */}
+        <div className="flex items-center gap-4 mb-10 overflow-x-auto pb-4 no-scrollbar">
+          <button 
+            onClick={() => setActiveCategory("ALL")}
+            className={`px-6 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border ${
+              activeCategory === "ALL" 
+              ? "bg-green-500 text-black border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]" 
+              : "bg-white/5 text-gray-400 border-white/10 hover:border-white/20"
+            }`}
+          >
+            All Sectors
+          </button>
+          {categories.map((cat) => (
+            <button 
+              key={cat._id}
+              onClick={() => setActiveCategory(cat._id)}
+              className={`px-6 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border ${
+                activeCategory === cat._id 
+                ? "bg-green-500 text-black border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]" 
+                : "bg-white/5 text-gray-400 border-white/10 hover:border-white/20"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* 🎮 Games Grid */}
+        <div className="mb-8 flex items-center justify-between border-b border-white/5 pb-4">
+          <h3 className="text-xl font-black uppercase tracking-[0.2em] flex items-center gap-3">
+            <LayoutGrid className="text-green-500" size={24} /> 
+            Operational <span className="text-green-500">Assets</span>
+          </h3>
+          <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">
+            Showing {filteredGames.length} available units
+          </p>
+        </div>
+
+        {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} className="h-72 bg-white/5 rounded-2xl animate-pulse border border-white/10"></div>
+                ))}
+            </div>
+        ) : filteredGames.length === 0 ? (
+            <div className="py-20 text-center">
+                <Gamepad2 size={48} className="mx-auto text-gray-700 mb-4" />
+                <h4 className="text-gray-500 font-mono uppercase tracking-widest">No assets found in this sector</h4>
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {filteredGames.map((game) => (
+                    <GameCard 
+                        key={game._id} 
+                        game={game} 
+                        onViewInfo={(g) => setSelectedGame(g)}
+                        onPlay={(id) => navigate(`/play/${id}`)}
+                    />
+                ))}
+            </div>
+        )}
+
+        {/* Info Modal */}
+        {selectedGame && (
+            <GameInfoModel 
+                game={selectedGame} 
+                onClose={() => setSelectedGame(null)} 
+                onPlay={(id) => navigate(`/play/${id}`)}
+            />
+        )}
+
+      </div>
+      
+      {/* Footer Intel */}
+      <footer className="max-w-7xl mx-auto px-8 py-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-xs font-mono text-gray-600 uppercase tracking-widest">© 2026 GameHub-X Terminal | All Rights Reserved</p>
+          <div className="flex gap-8 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">
+              <span className="hover:text-green-500 cursor-pointer transition-colors">Privacy Policy</span>
+              <span className="hover:text-green-500 cursor-pointer transition-colors">Terms of Service</span>
+              <span className="hover:text-green-500 cursor-pointer transition-colors">Support Center</span>
+          </div>
+      </footer>
+    </div>
+  );
+}
