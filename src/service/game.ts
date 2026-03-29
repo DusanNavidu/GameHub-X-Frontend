@@ -25,9 +25,9 @@ export const createGame = async (formData: FormData) => {
   const res = await api.post("/games", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  console.log("Create Game Response:", res.data);
-  console.log("User Role:", localStorage.getItem("userRole"));
-  console.log("User Token:", localStorage.getItem("token"));
+  // console.log("Create Game Response:", res.data);
+  // console.log("User Role:", localStorage.getItem("userRole"));
+  // console.log("User Token:", localStorage.getItem("token"));
   return res.data;
 };
 
