@@ -30,7 +30,6 @@ export default function PlayGame() {
     fetchGame();
   }, [id]);
 
-  // 🟢 Custom Next-Level Loading Progress Logic
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     

@@ -4,7 +4,7 @@ import { refreshTokens } from "./auth";
 const api = axios.create({
   // https://game-hub-x-backend-new.vercel.app/api/v1
   // http://localhost:5000/api/v1
-  baseURL: "https://game-hub-x-backend-new.vercel.app/api/v1",
+  baseURL: "http://localhost:5000/api/v1",
 });
 
 const PUBLIC_ENDPOINTS = [

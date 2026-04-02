@@ -6,7 +6,8 @@ import {
   ListTree, 
   Settings, 
   LogOut,
-  ShieldAlert
+  ShieldAlert,
+  Hash
 } from "lucide-react";
 import { useAuth } from "../context/authContext";
 
@@ -26,6 +27,7 @@ export default function AdminMenuPanel() {
     { name: "Player Manage", path: "/admin/players", icon: <Users size={20} /> },
     { name: "Game Manage", path: "/admin/games", icon: <Gamepad2 size={20} /> },
     { name: "Category Manage", path: "/admin/categories", icon: <ListTree size={20} /> },
+    { name: "Tag Manage", path: "/admin/tags", icon: <Hash size={20} /> },
     { name: "System Settings", path: "/admin/settings", icon: <Settings size={20} /> },
   ];
 
